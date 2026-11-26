@@ -1,0 +1,40 @@
+
+# Marks of two sections
+A <- c(72,68,81,55,90,74,88,60,77,85)
+
+B <- c(65,70,78,62,69,80,75,73,71,68)
+
+# Mean
+mean_A <- mean(A)
+mean_B <- mean(B)
+
+# Median
+median_A <- median(A)
+median_B <- median(B)
+
+# Range
+range_A <- diff(range(A))
+range_B <- diff(range(B))
+
+# Display results
+cat("Section A Mean:", mean_A, "\n")
+cat("Section B Mean:", mean_B, "\n")
+
+cat("Section A Median:", median_A, "\n")
+cat("Section B Median:", median_B, "\n")
+
+cat("Section A Range:", range_A, "\n")
+cat("Section B Range:", range_B, "\n")
+
+# Boxplot
+marks <- data.frame(
+  Marks = c(A,B),
+  Section = factor(rep(c("A","B"), each=10))
+)
+
+boxplot(Marks ~ Section,
+        data=marks,
+        main="Comparison of Section A and B",
+        xlab="Sections",
+        ylab="Marks",
+        col=c("lightblue","lightgreen"))
