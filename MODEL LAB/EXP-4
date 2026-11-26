@@ -1,0 +1,32 @@
+
+# Market Basket Items
+transactions <- list(
+  c("Milk","Beer","Diapers"),
+  c("Bread","Butter","Milk"),
+  c("Milk","Diapers","Cookies"),
+  c("Bread","Butter","Cookies"),
+  c("Beer","Cookies","Diapers"),
+  c("Milk","Diapers","Bread","Butter"),
+  c("Bread","Butter","Diapers"),
+  c("Beer","Diapers"),
+  c("Milk","Diapers","Bread","Butter"),
+  c("Beer","Cookies")
+)
+
+# Find unique items
+items <- unique(unlist(transactions))
+
+n <- length(items)
+
+# Maximum association rules
+rules <- 3^n - 2*(2^n) + 1
+
+# Maximum frequent itemset size
+max_size <- max(sapply(transactions, length))
+
+# Display output
+cat("Total unique items:", n, "\n")
+
+cat("Maximum association rules:", rules, "\n")
+
+cat("Maximum frequent itemset size:", max_size, "\n")
