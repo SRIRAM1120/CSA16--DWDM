@@ -1,0 +1,103 @@
+
+# Install required packages
+# install.packages("e1071")
+# install.packages("rpart")
+
+library(e1071)
+library(rpart)
+
+# Create dataset
+data <- data.frame(
+  age = c("<=30","<=30","31..40",">40",">40",">40",
+          "31..40","<=30","<=30",">40","<=30",
+          "31..40","31..40",">40"),
+
+  income = c("high","high","high","medium","low","low",
+             "low","medium","low","medium","medium",
+             "medium","high","medium"),
+
+  student = c("no","no","no","no","yes","yes","yes",
+              "no","yes","yes","yes","no","yes","no"),
+
+  credit_rating = c("fair","excellent","fair","fair","fair",
+                    "excellent","excellent","fair","fair",
+                    "fair","excellent","excellent","fair",
+                    "excellent"),
+
+  buys_computer = c("no","no","yes","yes","yes","no",
+                    "yes","no","yes","yes","yes","yes",
+                    "yes","no")
+)
+
+# Convert columns into factors
+data[] <- lapply(data, factor)
+
+# Save ARFF dataset
+arff <- c(
+  "@relation buys_computer",
+  "@attribute age {<=30,31..40,>40}",
+  "@attribute income {high,medium,low}",
+  "@attribute student {yes,no}",
+  "@attribute credit_rating {fair,excellent}",
+  "@attribute buys_computer {yes,no}",
+  "@data"
+)
+
+writeLines(arff, "buys_computer.arff")
+
+write.table(data, "buys_data.csv",
+            sep=",", row.names=FALSE,
+            col.names=FALSE, quote=FALSE,
+            append=TRUE)
+
+# Naive Bayes classifier
+nb_model <- naiveBayes(buys_computer ~ ., data=data)
+
+nb_pred <- predict(nb_model, data)
+
+# Decision Tree classifier
+dt_model <- rpart(
+  buys_computer ~ .,
+  data=data,
+  method="class",
+  control=rpart.control(cp=0, minsplit=2,
+                        minbucket=1, xval=0)
+)
+
+dt_pred <- predict(dt_model, data, type="class")
+
+# Performance calculation
+performance <- function(actual, predicted) {
+  cm <- table(actual, predicted)
+
+  TP <- ifelse("yes" %in% rownames(cm) &&
+               "yes" %in% colnames(cm),
+               cm["yes","yes"], 0)
+
+  FP <- ifelse("no" %in% rownames(cm) &&
+               "yes" %in% colnames(cm),
+               cm["no","yes"], 0)
+
+  FN <- ifelse("yes" %in% rownames(cm) &&
+               "no" %in% colnames(cm),
+               cm["yes","no"], 0)
+
+  accuracy <- sum(diag(cm)) / sum(cm) * 100
+  precision <- TP / (TP + FP)
+  recall <- TP / (TP + FN)
+  f1 <- 2 * precision * recall /
+        (precision + recall)
+
+  c(Accuracy=accuracy, F1_Score=f1*100)
+}
+
+# Display results
+cat("Naive Bayes Results:\n")
+print(performance(data$buys_computer, nb_pred))
+
+cat("Decision Tree Results:\n")
+print(performance(data$buys_computer, dt_pred))
+
+# Plot decision tree
+plot(dt_model, uniform=TRUE, margin=0.1)
+text(dt_model, use.n=TRUE, all=TRUE, cex=0.7)
